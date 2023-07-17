@@ -49,8 +49,9 @@ const AccountContent = () => {
       )}
       {subscription && (
         <div className="flex flex-col gap-y-4">
-          <p>You are currently on the 
-            <b> {subscription?.prices?.products?.name} </b> 
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+          <p>You are currently on the <b> {subscription?.prices?.products?.name} </b> 
             plan.
           </p>
           <Button
