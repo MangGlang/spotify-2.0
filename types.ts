@@ -64,4 +64,5 @@ export interface Subscription {
     trial_start?: string;
     trial_end?: string;
     prices?: PromiseConstructor;
+    products?: Product;
 }
