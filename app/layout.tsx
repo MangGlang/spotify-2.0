@@ -10,6 +10,7 @@ import SupabaseProvider from '@/providers/SupabaseProvider'
 import Player from '@/components/Player'
 
 import './globals.css'
+// import { SkeletonTheme } from 'react-loading-skeleton'
 
 const font = Figtree({ subsets: ['latin'] })
 
@@ -31,6 +32,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={font.className}>
+      {/* <SkeletonTheme baseColor="#202020" highlightColor="#444"> */}
         <ToasterProvider />
         <SupabaseProvider>
           <UserProvider>
@@ -41,6 +43,7 @@ export default async function RootLayout({
             <Player />
           </UserProvider>
         </SupabaseProvider>
+        {/* </SkeletonTheme> */}
       </body>
     </html>
   )
