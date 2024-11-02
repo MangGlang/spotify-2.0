@@ -130,7 +130,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       const data = await fetchSongData(song.id);
       if (data) {
         setSongData(data);
-        setupMediaSession(data);
+        setupMediaSession(data); // Set up the media session with fetched song data
+      } else {
+        // If there's no data, set up with hardcoded values for testing
+        setupMediaSession({
+          title: "Test Song Title",
+          author: "Test Artist",
+          imageUrl: "https://via.placeholder.com/512", // Example image URL
+        });
       }
     };
 
