@@ -12,12 +12,15 @@ interface SongItemProps {
   onClick: (id: string) => void;
 }
 
-const SongItem: React.FC<SongItemProps> = ({ data, onClick }) => {
+const SongItem: React.FC<SongItemProps> = ({
+  data,
+  onClick
+}) => {
   const imagePath = useLoadImage(data);
 
-  return (
+  return ( 
     <div
-      onClick={() => onClick(data.id)}
+      onClick={() => onClick(data.id)} 
       className="
         relative 
         group 
@@ -35,7 +38,7 @@ const SongItem: React.FC<SongItemProps> = ({ data, onClick }) => {
         p-3
       "
     >
-      <div
+      <div 
         className="
           relative 
           aspect-square 
@@ -47,35 +50,28 @@ const SongItem: React.FC<SongItemProps> = ({ data, onClick }) => {
       >
         <Image
           className="object-cover"
-          src={imagePath || "/images/music-placeholder.png"}
+          src={imagePath || '/images/music-placeholder.png'}
           fill
           alt="Image"
         />
       </div>
       <div className="flex flex-col items-start w-full pt-4 gap-y-1">
-        <div className="w-full overflow-hidden">
-          <p
-            className={`font-semibold ${
-              data.title.length > 15 ? "scroll-text" : ""
-            }`}
-            style={{ width: "100%" }}
-          >
-            {data.title}
-          </p>
-        </div>
-        <div className="w-full overflow-hidden">
-          <p
-            className={`text-neutral-400 text-sm pb-4 ${
-              data.author.length > 15 ? "scroll-text" : ""
-            }`}
-            style={{ width: "100%" }}
-          >
-            By {data.author}
-          </p>
-        </div>
+        <p className="font-semibold truncate w-full">
+          {data.title}
+        </p>
+        <p 
+          className="
+            text-neutral-400 
+            text-sm 
+            pb-4 
+            w-full 
+            truncate
+          "
+        >
+          By {data.author}
+        </p>
       </div>
-
-      <div
+      <div 
         className="
           absolute 
           bottom-24 
@@ -85,7 +81,7 @@ const SongItem: React.FC<SongItemProps> = ({ data, onClick }) => {
         <PlayButton />
       </div>
     </div>
-  );
-};
-
+   );
+}
+ 
 export default SongItem;

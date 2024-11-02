@@ -63,11 +63,9 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
   const setupMediaSession = useCallback(
     (data) => {
-      // Log the data to verify that it contains the expected properties
-      console.log("Setting up media session with data:", data);
+      // console.log("Setting up media session with data:", data);
 
-      // Check for required fields and log a warning if any are missing
-      if (!data || !data.title || !data.artist || !data.imageUrl) {
+      if (!data || !data.title || !data.author || !data.imageUrl) {
         console.warn("Media session data is missing required fields:", data);
         return;
       }
@@ -75,8 +73,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: data.title,
-          artist: data.artist,
-          album: data.album || "Unknown Album",
+          artist: data.author,
+          album: "Unknown Album",
           artwork: [
             { src: data.imageUrl, sizes: "512x512", type: "image/png" },
           ],
@@ -97,7 +95,6 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
   );
 
   const fetchSongData = async (songId) => {
-    // Fetch song metadata from the "songs" bucket
     const { data: songData, error: songError } = await supabaseClient
       .from("songs")
       .select("*")
@@ -109,22 +106,19 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       return null;
     }
 
-    // Fetch the image URL from the "images" bucket
     const { data: imageData, error: imageError } = await supabaseClient.storage
       .from("images")
-      .download(songData.image_path); // Assuming `image_path` is the key in the "songs" bucket for the image file path
+      .download(songData.image_path);
 
     if (imageError || !imageData) {
       console.error("Error fetching song image:", imageError);
       return null;
     }
 
-    // Generate a public URL for the image file
     const imageUrl = supabaseClient.storage
       .from("images")
       .getPublicUrl(songData.image_path).data.publicUrl;
 
-    // Combine song metadata and image URL
     return {
       ...songData,
       imageUrl,
