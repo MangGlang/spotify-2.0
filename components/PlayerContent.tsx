@@ -11,7 +11,6 @@ import LikeButton from "./LikeButton";
 import MediaItem from "./MediaItem";
 import Slider from "./Slider";
 import { useSessionContext } from "@supabase/auth-helpers-react";
-const { supabaseClient } = useSessionContext();
 
 interface PlayerContentProps {
   song: Song;
@@ -90,6 +89,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
   };
 
   const fetchSongData = async (songId) => {
+    const { supabaseClient } = useSessionContext();
     // Fetch song metadata from the "songs" bucket
     const { data: songData, error: songError } = await supabaseClient
       .from("songs")
