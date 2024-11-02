@@ -63,11 +63,20 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
   const setupMediaSession = useCallback(
     (data) => {
+      // Log the data to verify that it contains the expected properties
+      console.log("Setting up media session with data:", data);
+
+      // Check for required fields and log a warning if any are missing
+      if (!data || !data.title || !data.artist || !data.imageUrl) {
+        console.warn("Media session data is missing required fields:", data);
+        return;
+      }
+
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: data.title,
-          artist: data.artist, // Ensure this field is available in song data
-          album: data.album || "Unknown Album", // Optional album field
+          artist: data.artist,
+          album: data.album || "Unknown Album",
           artwork: [
             { src: data.imageUrl, sizes: "512x512", type: "image/png" },
           ],
@@ -80,6 +89,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
           onPlayPrevious
         );
         navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
+      } else {
+        console.warn("Media session is not supported on this browser.");
       }
     },
     [handlePlay, onPlayNext, onPlayPrevious]
