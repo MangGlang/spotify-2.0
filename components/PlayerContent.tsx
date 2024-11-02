@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useSound from "use-sound";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
@@ -19,6 +19,7 @@ interface PlayerContentProps {
 
 const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
   const player = usePlayer();
+  const { supabaseClient } = useSessionContext();
   const [volume, setVolume] = useState(0.2);
   const [isPlaying, setIsPlaying] = useState(false);
   const [songData, setSongData] = useState(null);
@@ -60,36 +61,31 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     setVolume(volume === 0 ? 1 : 0);
   };
 
-  useEffect(() => {
-    const loadSongData = async () => {
-      const data = await fetchSongData(song.id);
-      if (data) {
-        setSongData(data);
-        setupMediaSession(data);
+  const setupMediaSession = useCallback(
+    (data) => {
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: data.title,
+          artist: data.artist, // Ensure this field is available in song data
+          album: data.album || "Unknown Album", // Optional album field
+          artwork: [
+            { src: data.imageUrl, sizes: "512x512", type: "image/png" },
+          ],
+        });
+
+        navigator.mediaSession.setActionHandler("play", handlePlay);
+        navigator.mediaSession.setActionHandler("pause", handlePlay);
+        navigator.mediaSession.setActionHandler(
+          "previoustrack",
+          onPlayPrevious
+        );
+        navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
       }
-    };
-
-    loadSongData();
-  }, [song.id]);
-
-  const setupMediaSession = (data) => {
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: data.title,
-        artist: data.artist, // Ensure this field is available in song data
-        album: data.album || "Unknown Album", // Optional album field
-        artwork: [{ src: data.imageUrl, sizes: "512x512", type: "image/png" }],
-      });
-
-      navigator.mediaSession.setActionHandler("play", handlePlay);
-      navigator.mediaSession.setActionHandler("pause", handlePlay);
-      navigator.mediaSession.setActionHandler("previoustrack", onPlayPrevious);
-      navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
-    }
-  };
+    },
+    [handlePlay, onPlayNext, onPlayPrevious]
+  );
 
   const fetchSongData = async (songId) => {
-    const { supabaseClient } = useSessionContext();
     // Fetch song metadata from the "songs" bucket
     const { data: songData, error: songError } = await supabaseClient
       .from("songs")
@@ -123,6 +119,18 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       imageUrl,
     };
   };
+
+  useEffect(() => {
+    const loadSongData = async () => {
+      const data = await fetchSongData(song.id);
+      if (data) {
+        setSongData(data);
+        setupMediaSession(data);
+      }
+    };
+
+    loadSongData();
+  }, [song.id, setupMediaSession]);
 
   useEffect(() => {
     sound?.play();
