@@ -9,3 +9,20 @@ body,
   background-color: black;
   color-scheme: dark;
 }
+
+/* Add this to your CSS */
+@keyframes scrollText {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.scroll-text {
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  animation: scrollText 10s linear infinite;
+}
