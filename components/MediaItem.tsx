@@ -54,22 +54,8 @@ const MediaItem: React.FC<MediaItemProps> = ({ data, onClick }) => {
         />
       </div>
       <div className="flex flex-col gap-y-1 overflow-hidden">
-        <p
-          className={`text-white ${
-            data.title.length > 15 ? "scroll-text" : "truncate"
-          }`}
-          style={{ width: "100%" }}
-        >
-          {data.title}
-        </p>
-        <p
-          className={`text-neutral-400 text-sm ${
-            data.author.length > 15 ? "scroll-text" : "truncate"
-          }`}
-          style={{ width: "100%" }}
-        >
-          By {data.author}
-        </p>
+        <p className="text-white truncate">{data.title}</p>
+        <p className="text-neutral-400 text-sm truncate">By {data.author}</p>
       </div>
     </div>
   );
