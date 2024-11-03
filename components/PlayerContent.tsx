@@ -74,22 +74,22 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: data.title,
           artist: data.author,
-          album: "Unknown Album",
           artwork: [
             { src: data.imageUrl, sizes: "512x512", type: "image/png" },
           ],
         });
 
-        navigator.mediaSession.setActionHandler("play", handlePlay);
-        navigator.mediaSession.setActionHandler("pause", handlePlay);
-        navigator.mediaSession.setActionHandler(
-          "previoustrack",
-          onPlayPrevious
-        );
-        navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
-      } else {
-        console.warn("Media session is not supported on this browser.");
-      }
+        // navigator.mediaSession.setActionHandler("play", handlePlay);
+        // navigator.mediaSession.setActionHandler("pause", handlePlay);
+        // navigator.mediaSession.setActionHandler(
+        //   "previoustrack",
+        //   onPlayPrevious
+        // );
+        // navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
+      } 
+      // else {
+      //   console.warn("Media session is not supported on this browser.");
+      // }
     },
     [handlePlay, onPlayNext, onPlayPrevious]
   );
