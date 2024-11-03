@@ -22,7 +22,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
   const { supabaseClient } = useSessionContext();
   const [volume, setVolume] = useState(0.2);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [songData, setSongData] = useState(null);
+  const [songData, setSongData] = useState<any>(null);
 
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
@@ -63,33 +63,23 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
   const setupMediaSession = useCallback(
     (data) => {
-      // console.log("Setting up media session with data:", data);
-
       if (!data || !data.title || !data.author || !data.imageUrl) {
         console.warn("Media session data is missing required fields:", data);
         return;
       }
 
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: data.title,
-          artist: data.author,
-          artwork: [
-            { src: data.imageUrl, sizes: "512x512", type: "image/png" },
-          ],
-        });
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: data.title,
+        artist: data.author,
+        artwork: [
+          { src: data.imageUrl, sizes: "512x512", type: "image/png" },
+        ],
+      });
 
-        // navigator.mediaSession.setActionHandler("play", handlePlay);
-        // navigator.mediaSession.setActionHandler("pause", handlePlay);
-        // navigator.mediaSession.setActionHandler(
-        //   "previoustrack",
-        //   onPlayPrevious
-        // );
-        // navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
-      } 
-      // else {
-      //   console.warn("Media session is not supported on this browser.");
-      // }
+      navigator.mediaSession.setActionHandler("play", handlePlay);
+      navigator.mediaSession.setActionHandler("pause", handlePlay);
+      navigator.mediaSession.setActionHandler("previoustrack", onPlayPrevious);
+      navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
     },
     [handlePlay, onPlayNext, onPlayPrevious]
   );
@@ -153,7 +143,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     <div className="grid grid-cols-2 md:grid-cols-3 h-full">
       <div className="flex w-full justify-start">
         <div className="flex items-center gap-x-4">
-          <MediaItem data={song} />
+          <MediaItem data={songData || song} />
           <LikeButton songId={song.id} />
         </div>
       </div>
