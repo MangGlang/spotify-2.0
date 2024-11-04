@@ -75,9 +75,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
   const handlePlay = () => {
     if (audio) {
-      audio.play().catch((error) => {
-        console.error("Error playing audio:", error);
-      });
+      audio.play();
     }
   };
 
@@ -97,6 +95,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       return player.setId(player.ids[0]); // Loop back to the first song
     }
     player.setId(nextSong); // Set to next song
+    
   };
 
   const onPlayPrevious = () => {
@@ -109,6 +108,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       return player.setId(player.ids[player.ids.length - 1]); // Loop to last song
     }
     player.setId(prevSong); // Set to previous song
+    
   };
 
   useEffect(() => {
@@ -128,7 +128,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     };
 
     loadSongData();
+    handlePlay();
   }, [song.id, setupMediaSession]);
+
+  
 
   useEffect(() => {
     const audioInstance = new Audio(songUrl);
