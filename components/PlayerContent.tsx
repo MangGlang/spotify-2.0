@@ -68,16 +68,6 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       // Set action handlers
       navigator.mediaSession.setActionHandler("play", handlePlay);
       navigator.mediaSession.setActionHandler("pause", handlePause);
-      navigator.mediaSession.setActionHandler("seekbackward", () => {
-        if (audio) {
-          audio.currentTime = Math.max(0, audio.currentTime - 10);
-        }
-      });
-      navigator.mediaSession.setActionHandler("seekforward", () => {
-        if (audio) {
-          audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
-        }
-      });
       navigator.mediaSession.setActionHandler("previoustrack", onPlayPrevious);
       navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
     }
