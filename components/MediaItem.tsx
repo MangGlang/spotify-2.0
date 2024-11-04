@@ -62,16 +62,8 @@ const MediaItem: React.FC<MediaItemProps> = ({ data, onClick }) => {
         />
       </div>
       <div className="flex flex-col gap-y-1 overflow-hidden">
-        <div className="scroll-container">
-          <p className={`text-white ${isCurrent ? 'scroll-text' : ''}`}>
-            {truncatedTitle}
-          </p>
-        </div>
-        <div className="scroll-container">
-          <p className={`text-neutral-400 text-sm ${isCurrent ? 'scroll-text' : ''}`}>
-            {truncatedAuthor}
-          </p>
-        </div>
+        <p className="text-white">{truncatedTitle}</p>
+        <p className="text-neutral-400 text-sm">{truncatedAuthor}</p>
       </div>
     </div>
   );
