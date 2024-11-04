@@ -7,7 +7,6 @@ import usePlayer from "@/hooks/usePlayer";
 
 interface MediaItemProps {
   data: Song;
-  isCurrent: boolean; // New prop to indicate if this is the current song
   onClick?: (id: string) => void;
 }
 
@@ -16,7 +15,7 @@ const truncateString = (str: string, maxLength: number) => {
   return str.length > maxLength ? `${str.slice(0, maxLength - 3)}...` : str;
 };
 
-const MediaItem: React.FC<MediaItemProps> = ({ data, isCurrent, onClick }) => {
+const MediaItem: React.FC<MediaItemProps> = ({ data, onClick }) => {
   const player = usePlayer();
   const imageUrl = useLoadImage(data);
 
