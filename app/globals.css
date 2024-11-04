@@ -94,3 +94,24 @@ body,
   border-radius: 50%;
   cursor: pointer;
 }
+
+/* Add this to your global CSS or the relevant CSS module */
+.scroll-container {
+  width: 100%; /* Full width */
+  overflow: hidden; /* Hide overflow */
+  white-space: nowrap; /* Prevent line breaks */
+}
+
+.scroll-text {
+  display: inline-block; /* Make it inline to apply the animation */
+  animation: scroll 10s linear infinite; /* Adjust the duration as needed */
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(100%); /* Start from right outside */
+  }
+  100% {
+    transform: translateX(-100%); /* End at left outside */
+  }
+}
