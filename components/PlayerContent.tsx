@@ -9,6 +9,7 @@ import LikeButton from "./LikeButton";
 import MediaItem from "./MediaItem";
 import Slider from "./Slider";
 import { createClient } from "@supabase/supabase-js";
+import useSound from "use-sound";
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -27,6 +28,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [songDetails, setSongDetails] = useState<any>(null);
+  const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
+
 
   // Function to fetch song details from Supabase
   const fetchSongDetails = async (songId: string) => {
@@ -35,54 +38,58 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       .select("*")
       .eq("id", songId)
       .single();
-  
+
     if (error) {
       console.error("Error fetching song details:", error);
       return null; // Return null if there's an error
     }
-  
+
     // Extract the relevant details and return them
     const { title, author, image_path } = data;
-    const completeImageUrl = `https://ipjjlddfslhqhkzsdxer.supabase.co/storage/v1/object/public/images/${encodeURIComponent(image_path)}`;
-  
+    const completeImageUrl = `https://ipjjlddfslhqhkzsdxer.supabase.co/storage/v1/object/public/images/${encodeURIComponent(
+      image_path
+    )}`;
+
     return {
       title,
       author,
       imageUrl: completeImageUrl,
     };
   };
-  
 
-  const setupMediaSession = useCallback((songDetails) => {
-    if ("mediaSession" in navigator && songDetails) {
-      const artwork: MediaImage[] = songDetails.imageUrl
-        ? [{ src: songDetails.imageUrl, sizes: "512x512", type: "image/png" }]
-        : [];
+  const setupMediaSession = useCallback(
+    (songDetails) => {
+      if ("mediaSession" in navigator && songDetails) {
+        const artwork: MediaImage[] = songDetails.imageUrl
+          ? [{ src: songDetails.imageUrl, sizes: "512x512", type: "image/png" }]
+          : [];
 
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: songDetails.title,
-        artist: songDetails.author,
-        artwork,
-      });
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: songDetails.title,
+          artist: songDetails.author,
+          artwork,
+        });
 
-      // Set action handlers
-      navigator.mediaSession.setActionHandler("play", handlePlay);
-      navigator.mediaSession.setActionHandler("pause", handlePause);
-      navigator.mediaSession.setActionHandler("previoustrack", onPlayPrevious);
-      navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
-    }
-  }, [audio]);
+        // Set action handlers
+        navigator.mediaSession.setActionHandler("play", handlePlay);
+        navigator.mediaSession.setActionHandler(
+          "previoustrack",
+          onPlayPrevious
+        );
+        navigator.mediaSession.setActionHandler("nexttrack", onPlayNext);
+      }
+    },
+    [audio]
+  );
 
   const handlePlay = () => {
-    if (audio) {
-      audio.play();
-    }
+    if (!isPlaying) play();
+    else pause();
   };
 
-  const handlePause = () => {
-    if (audio) {
-      audio.pause();
-    }
+
+  const toggleMute = () => {
+    setVolume(volume === 0 ? 1 : 0);
   };
 
   const onPlayNext = () => {
@@ -95,7 +102,6 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       return player.setId(player.ids[0]); // Loop back to the first song
     }
     player.setId(nextSong); // Set to next song
-    
   };
 
   const onPlayPrevious = () => {
@@ -108,7 +114,6 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       return player.setId(player.ids[player.ids.length - 1]); // Loop to last song
     }
     player.setId(prevSong); // Set to previous song
-    
   };
 
   useEffect(() => {
@@ -128,26 +133,39 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     };
 
     loadSongData();
-    handlePlay();
   }, [song.id, setupMediaSession]);
 
-  
+  const [play, { pause, sound }] = useSound(songUrl, {
+    volume,
+    onplay: () => setIsPlaying(true),
+    onend: () => {
+      setIsPlaying(false);
+      onPlayNext();
+    },
+    onpause: () => setIsPlaying(false),
+    format: ["mp3"],
+  });
+
+  useEffect(() => {
+    sound?.play();
+    return () => sound?.unload();
+  }, [sound]);
 
   useEffect(() => {
     const audioInstance = new Audio(songUrl);
     audioInstance.volume = volume;
 
     // Set up audio event listeners
-    audioInstance.addEventListener('play', () => setIsPlaying(true));
-    audioInstance.addEventListener('pause', () => setIsPlaying(false));
+    audioInstance.addEventListener("play", () => setIsPlaying(true));
+    audioInstance.addEventListener("pause", () => setIsPlaying(false));
 
     setAudio(audioInstance);
 
     return () => {
       audioInstance.pause();
       audioInstance.src = "";
-      audioInstance.removeEventListener('play', () => setIsPlaying(true));
-      audioInstance.removeEventListener('pause', () => setIsPlaying(false));
+      audioInstance.removeEventListener("play", () => setIsPlaying(true));
+      audioInstance.removeEventListener("pause", () => setIsPlaying(false));
     };
   }, [songUrl, volume]);
 
@@ -170,10 +188,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
       <div className="flex md:hidden col-auto w-full justify-end items-center">
         <div
-          onClick={isPlaying ? handlePause : handlePlay}
+          onClick={handlePlay}
           className="h-10 w-10 flex items-center justify-center rounded-full bg-white p-1 cursor-pointer"
         >
-          {isPlaying ? <BsPauseFill size={30} className="text-black" /> : <BsPlayFill size={30} className="text-black" />}
+          {isPlaying ? (
+            <BsPauseFill size={30} className="text-black" />
+          ) : (
+            <BsPlayFill size={30} className="text-black" />
+          )}
         </div>
       </div>
 
@@ -184,10 +206,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
           className="text-neutral-400 cursor-pointer hover:text-white transition"
         />
         <div
-          onClick={isPlaying ? handlePause : handlePlay}
+          onClick={handlePlay}
           className="flex items-center justify-center h-10 w-10 rounded-full bg-white p-1 cursor-pointer"
         >
-          {isPlaying ? <BsPauseFill size={30} className="text-black" /> : <BsPlayFill size={30} className="text-black" />}
+          {isPlaying ? (
+            <BsPauseFill size={30} className="text-black" />
+          ) : (
+            <BsPlayFill size={30} className="text-black" />
+          )}
         </div>
         <AiFillStepForward
           onClick={onPlayNext}
@@ -198,7 +224,11 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
       <div className="hidden md:flex w-full justify-end pr-2">
         <div className="flex items-center gap-x-2 w-[120px]">
-          {volume === 0 ? <HiSpeakerXMark onClick={() => setVolume(1)} className="cursor-pointer" size={34} /> : <HiSpeakerWave onClick={() => setVolume(0)} className="cursor-pointer" size={34} />}
+          <VolumeIcon
+            onClick={toggleMute}
+            className="cursor-pointer"
+            size={34}
+          />
           <Slider value={volume} onChange={(value) => setVolume(value)} />
         </div>
       </div>
