@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
@@ -10,7 +10,6 @@ import MediaItem from "./MediaItem"; // Component displaying song information
 import Slider from "./Slider"; // Component for volume control
 import { createClient } from "@supabase/supabase-js";
 import useSound from "use-sound";
-import debounce from "lodash.debounce"; // Install lodash.debounce for debouncing
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -65,10 +64,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       );
       audioInstance.removeEventListener("ended", onPlayNext); // Remove ended event listener
     };
-  }, [songUrl, volume]);
+  }, [songUrl]);
 
-  // Fetch song details from Supabase with debouncing
-  const fetchSongDetails = useMemo(() => debounce(async (songId: string) => {
+  // Fetch song details from Supabase
+  const fetchSongDetails = async (songId: string) => {
     const { data, error } = await supabase
       .from("songs")
       .select("*")
@@ -89,7 +88,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
         imageUrl: completeImageUrl,
       });
     }
-  }, 300), []); // 300ms debounce
+  };
 
   const setupMediaSession = useCallback(() => {
     if ("mediaSession" in navigator && songDetails) {
@@ -187,7 +186,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       fetchSongDetails(song.id);
     }
     setupMediaSession();
-  }, [song.id, setupMediaSession]);
+  }, [song, setupMediaSession]);
 
   useEffect(() => {
     if (audio) {
@@ -208,40 +207,58 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
           <LikeButton songId={song.id} />
         </div>
       </div>
-      <div className="flex md:hidden col-auto w-full justify-end items-center">
-        <div
-          onClick={() => {}}
-          className="h-10 w-10 flex items-center justify-center rounded-full bg-white p-1 cursor-pointer"
-        >
-          {isPlaying ? (
-            <BsPauseFill size={30} className="text-black" />
-          ) : (
-            <BsPlayFill size={30} className="text-black" />
-          )}
+
+      <div className="flex row-auto justify-center items-center flex-col">
+        <div className="flex md:hidden col-auto w-full justify-end items-center">
+          <div
+            onClick={isPlaying ? handlePause : handlePlay}
+            className="h-10 w-10 flex items-center justify-center rounded-full bg-white p-1 cursor-pointer"
+          >
+            {isPlaying ? (
+              <BsPauseFill size={30} className="text-black" />
+            ) : (
+              <BsPlayFill size={30} className="text-black" />
+            )}
+          </div>
+        </div>
+
+        <div className="hidden h-full md:flex justify-center items-center w-full max-w-[722px] gap-x-6">
+          <AiFillStepBackward
+            size={30}
+            className="text-neutral-400 cursor-pointer hover:text-white transition"
+            onClick={onPlayPrevious}
+          />
+          <div
+            onClick={isPlaying ? handlePause : handlePlay}
+            className="flex items-center justify-center h-10 w-10 rounded-full bg-white p-1 cursor-pointer"
+          >
+            {isPlaying ? (
+              <BsPauseFill size={30} className="text-black" />
+            ) : (
+              <BsPlayFill size={30} className="text-black" />
+            )}
+          </div>
+          <AiFillStepForward
+            size={30}
+            className="text-neutral-400 cursor-pointer hover:text-white transition"
+            onClick={onPlayNext}
+          />
+        </div>
+
+        <div className="w-full mt-2 flex items-center">
+          <span className="text-sm text-white">{formatTime(currentTime)}</span>
+          <input
+            type="range"
+            min={0}
+            max={duration}
+            value={currentTime}
+            onChange={handleSeek}
+            className="flex-grow mx-4 cursor-pointer slider"
+          />
+          <span className="text-sm text-white">{formatTime(duration)}</span>
         </div>
       </div>
-      <div className="hidden h-full md:flex justify-center items-center w-full max-w-[722px] gap-x-6">
-        <AiFillStepBackward
-          onClick={onPlayPrevious}
-          size={30}
-          className="text-neutral-400 cursor-pointer hover:text-white transition"
-        />
-        <div
-          onClick={() => (isPlaying ? handlePause() : handlePlay())}
-          className="flex items-center justify-center h-10 w-10 rounded-full bg-white p-1 cursor-pointer"
-        >
-          {isPlaying ? (
-            <BsPauseFill size={30} className="text-black" />
-          ) : (
-            <BsPlayFill size={30} className="text-black" />
-          )}
-        </div>
-        <AiFillStepForward
-          onClick={onPlayNext}
-          size={30}
-          className="text-neutral-400 cursor-pointer hover:text-white transition"
-        />
-      </div>
+
       <div className="hidden md:flex w-full justify-end pr-2">
         <div className="flex items-center gap-x-2 w-[120px]">
           <VolumeIcon
