@@ -180,6 +180,13 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
+  const handleVolumeChange = (newVolume) => {
+    if (audio) {
+      audio.volume = newVolume;
+    }
+    setVolume(newVolume);
+  };
+
   useEffect(() => {
     // Fetch song details when the song prop changes
     if (song.id) {
@@ -191,13 +198,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
   useEffect(() => {
     if (audio) {
       // Play the audio when songUrl changes
+      audio.volume = volume;
       handlePlay();
 
       // Sync play/pause state with audio element
       audio.onplaying = () => setIsPlaying(true);
       audio.onpause = () => setIsPlaying(false);
     }
-  }, [audio, songUrl]);
+  }, [volume, audio, songUrl]);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 h-full">
@@ -266,7 +274,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
             className="cursor-pointer"
             size={34}
           />
-          <Slider value={volume} onChange={(value) => setVolume(value)} />
+          <Slider value={volume} onChange={(value) => handleVolumeChange(value)} />
         </div>
       </div>
     </div>
