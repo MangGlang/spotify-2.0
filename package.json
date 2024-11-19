@@ -25,6 +25,7 @@
     "cross-fetch": "^4.0.0",
     "eslint-config-next": "13.4.9",
     "express": "^4.18.2",
+    "lodash.debounce": "^4.0.8",
     "next": "13.4.9",
     "postcss": "8.4.26",
     "query-string": "^8.1.0",
