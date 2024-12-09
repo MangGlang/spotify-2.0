@@ -9,7 +9,6 @@ import LikeButton from "./LikeButton";
 import MediaItem from "./MediaItem"; // Component displaying song information
 import Slider from "./Slider"; // Component for volume control
 import { createClient } from "@supabase/supabase-js";
-import useSound from "use-sound";
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -189,11 +188,11 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
   useEffect(() => {
     // Fetch song details when the song prop changes
-    if (song.id) {
-      fetchSongDetails(song.id);
-    }
+    // if (song.id) {
+    fetchSongDetails(song.id);
+    // }
     setupMediaSession();
-  }, [song, setupMediaSession]);
+  }, [song.id]);
 
   useEffect(() => {
     if (audio) {
@@ -274,7 +273,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
             className="cursor-pointer"
             size={34}
           />
-          <Slider value={volume} onChange={(value) => handleVolumeChange(value)} />
+          <Slider
+            value={volume}
+            onChange={(value) => handleVolumeChange(value)}
+          />
         </div>
       </div>
     </div>
