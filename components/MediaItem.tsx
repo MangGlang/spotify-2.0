@@ -59,6 +59,8 @@ const MediaItem: React.FC<MediaItemProps> = ({ data, onClick }) => {
           src={imageUrl || "/images/music-placeholder.png"}
           alt="MediaItem"
           className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority // Use priority if this is an above-the-fold image
         />
       </div>
       <div className="flex flex-col gap-y-1 overflow-hidden">

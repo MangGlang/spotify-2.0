@@ -10,6 +10,7 @@ import MediaItem from "./MediaItem"; // Component displaying song information
 import Slider from "./Slider"; // Component for volume control
 import { createClient } from "@supabase/supabase-js";
 
+
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -192,19 +193,51 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     fetchSongDetails(song.id);
     // }
     setupMediaSession();
+    console.log(song.id);
   }, [song.id]);
 
   useEffect(() => {
-    if (audio) {
-      // Play the audio when songUrl changes
-      audio.volume = volume;
-      handlePlay();
-
-      // Sync play/pause state with audio element
-      audio.onplaying = () => setIsPlaying(true);
-      audio.onpause = () => setIsPlaying(false);
+    if (!audio || !songUrl) {
+      console.error("Audio instance or song URL is missing.");
+      return;
     }
-  }, [volume, audio, songUrl]);
+  
+    // Set volume for the audio
+    audio.volume = volume;
+  
+    // Attempt to play the audio when songUrl changes
+    const playAudio = async () => {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Error playing audio:", error);
+      }
+    };
+  
+    playAudio();
+  
+    // Sync play/pause state with audio element
+    const handlePlaying = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleError = () => {
+      console.error("Failed to load media resource:", songUrl);
+      setIsPlaying(false);
+    };
+  
+    // Add event listeners
+    audio.addEventListener("playing", handlePlaying);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("error", handleError);
+  
+    // Clean up event listeners when dependencies change or component unmounts
+    return () => {
+      audio.removeEventListener("playing", handlePlaying);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("error", handleError);
+    };
+  }, [audio, songUrl, volume]);
+  
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 h-full">
